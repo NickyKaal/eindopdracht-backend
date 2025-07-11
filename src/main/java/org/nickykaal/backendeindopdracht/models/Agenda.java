@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="agendas")
@@ -20,5 +21,5 @@ public class Agenda {
 
     @OneToMany(mappedBy="agenda")
     @JsonIgnore
-    List<AgendaEntry> scheduledEvents;
+    Set<AgendaEntry> scheduledEvents;
 }

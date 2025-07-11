@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="djs")
@@ -21,6 +22,6 @@ public class Dj {
             joinColumns = @JoinColumn(name = "id_dj"),
             inverseJoinColumns = @JoinColumn(name = "id_event")
     )
-    List<Event> bookings;
+    Set<Event> bookings;
 
 }

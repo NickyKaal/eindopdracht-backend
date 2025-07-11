@@ -3,35 +3,51 @@ package org.nickykaal.backendeindopdracht.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="users")
 public class User {
     @Id
-    @GeneratedValue
     @Getter
-    Long id_user;
+    @Setter
+    String username;
 
-    @ManyToMany
+    @Setter
+    @Getter
+    private String password;
+
+
+    //https://www.baeldung.com/hibernate-initialize-proxy-exception
+    //TODO: use the Hibernate Criteria API ipv , uitzoeken hoe en waar
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     @JoinTable(
-            name = "user_groups",
-            joinColumns = @JoinColumn(name = "id_user"),
-            inverseJoinColumns = @JoinColumn(name = "id_group")
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "username"),
+            inverseJoinColumns = @JoinColumn(name = "rolename")
     )
-    List<Group> groups;
+    @Getter
+    @Setter
+    Set<Role> roles = new HashSet<>();
 
     @OneToMany
     @JsonIgnore
-    List<Friendship> friends;
+    Set<Friendship> friends;
 
     @OneToMany(mappedBy="user")
     @JsonIgnore
-    List<Friendship> users;
+    Set<Friendship> users;
 
     @OneToOne(mappedBy="user")
     @JsonIgnore
     Agenda agenda;
+
+    @OneToOne(mappedBy="user")
+    @JsonIgnore
+    Profile profile;
 }

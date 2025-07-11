@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="locations")
@@ -15,5 +16,5 @@ public class Location {
     Long id_location;
 
     @OneToMany(mappedBy="location")
-    List<Event> events;
+    Set<Event> events;
 }

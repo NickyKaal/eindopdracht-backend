@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="genres")
@@ -21,6 +22,6 @@ public class Genre {
             joinColumns = @JoinColumn(name = "id_genre"),
             inverseJoinColumns = @JoinColumn(name = "id_event")
     )
-    List<Event> events;
+    Set<Event> events;
 
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="announcements")
@@ -14,5 +15,5 @@ public class Announcement {
     Long id_announcement;
 
     @OneToMany(mappedBy="announcement")
-    List<AnnouncementChatMessage> chatMessages;
+    Set<AnnouncementChatMessage> chatMessages;
 }

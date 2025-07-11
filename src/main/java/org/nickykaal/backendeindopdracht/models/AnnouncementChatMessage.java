@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( name="announcement_chat_messages")
@@ -25,5 +26,5 @@ public class AnnouncementChatMessage {
 
     @OneToMany(mappedBy="message")
     @JsonIgnore
-    List<AnnouncementChatMessage> replies;
+    Set<AnnouncementChatMessage> replies;
 }
