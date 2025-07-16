@@ -20,6 +20,5 @@ public class Agenda {
     User user;
 
     @OneToMany(mappedBy="agenda")
-    @JsonIgnore
     Set<AgendaEntry> scheduledEvents;
 }

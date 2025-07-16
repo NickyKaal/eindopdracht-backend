@@ -9,18 +9,18 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/profiles")
 public class ProfileController {
 
-    // No ProfileService used in demo code!
 
     private final ProfileRepository repos;
 
     public ProfileController(ProfileRepository repos) {
         this.repos = repos;
     }
-
+    //TODO: service maken
     @PostMapping
     public ResponseEntity<Profile> createProfile(@RequestBody ProfileDto profileDto) {
         Profile profile = new Profile();

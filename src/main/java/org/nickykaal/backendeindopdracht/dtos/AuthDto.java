@@ -11,5 +11,9 @@ public class AuthDto {
 
     @Getter
     @Setter
+    public String email;
+
+    @Getter
+    @Setter
     public String password;
 }

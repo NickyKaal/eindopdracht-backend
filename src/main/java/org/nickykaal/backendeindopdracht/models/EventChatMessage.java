@@ -20,11 +20,9 @@ public class EventChatMessage {
     Event event;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name="id_reply")
     private EventChatMessage message;
 
     @OneToMany(mappedBy="message")
-    @JsonIgnore
     Set<EventChatMessage> replies;
 }

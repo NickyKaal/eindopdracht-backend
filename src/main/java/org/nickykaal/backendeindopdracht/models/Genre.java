@@ -16,7 +16,6 @@ public class Genre {
     Long id_genre;
 
     @ManyToMany
-    @JsonIgnore
     @JoinTable(
             name = "event_genres",
             joinColumns = @JoinColumn(name = "id_genre"),

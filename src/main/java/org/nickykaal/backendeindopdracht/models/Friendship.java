@@ -19,12 +19,10 @@ public class Friendship {
     private Date created;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "id_user")
     User user;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "id_friend")
     User friend;
 }

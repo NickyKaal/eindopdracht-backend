@@ -1,48 +1,79 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
 import org.nickykaal.backendeindopdracht.dtos.UserDto;
-import org.nickykaal.backendeindopdracht.models.Role;
-import org.nickykaal.backendeindopdracht.models.User;
-import org.nickykaal.backendeindopdracht.repositories.RoleRepository;
-import org.nickykaal.backendeindopdracht.repositories.UserRepository;
+import org.nickykaal.backendeindopdracht.exceptions.BadRequestException;
+import org.nickykaal.backendeindopdracht.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Optional;
-import java.util.Set;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
+@CrossOrigin
 @RestController
+@RequestMapping(value = "/users")
 public class UserController {
 
-    // No UserService used in demo code!
-
-    private final UserRepository userRepos;
-    private final RoleRepository roleRepos;
+    private final UserService userService;
     private final PasswordEncoder encoder;
 
-    public UserController(UserRepository userRepos, RoleRepository roleRepos, PasswordEncoder encoder) {
-        this.userRepos = userRepos;
-        this.roleRepos = roleRepos;
+    public UserController(UserService userService, PasswordEncoder encoder) {
+        this.userService = userService;
         this.encoder = encoder;
     }
-    @PostMapping("/users")
-    public String createUser(@RequestBody UserDto userDto) {
-        User newUser = new User();
-        newUser.setUsername(userDto.username);
-        newUser.setPassword(encoder.encode(userDto.password));
 
-        Set<Role> userRoles = newUser.getRoles();
-        for (String rolename : userDto.roles) {
-            Optional<Role> or = roleRepos.findById("ROLE_" + rolename);
-            if (or.isPresent()) {
-                userRoles.add(or.get());
-            }
-        }
+    @GetMapping(value = "")
+    public ResponseEntity<List<UserDto>> getUsers() {
 
-        userRepos.save(newUser);
+        List<UserDto> userDtos = userService.getUsers();
 
-        return "Done";
+        return ResponseEntity.ok().body(userDtos);
     }
+
+    @GetMapping(value = "/{username}")
+    public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
+
+        UserDto optionalUser = userService.getUser(username);
+
+        return ResponseEntity.ok().body(optionalUser);
+
+    }
+
+    @PostMapping(value = "")
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) {;
+
+        String newUsername = userService.createUser(dto, encoder);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
+                .buildAndExpand(newUsername).toUri();
+
+        return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping(value = "/{username}/roles")
+    public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
+        return ResponseEntity.ok().body(userService.getAuthorities(username));
+    }
+
+    @PostMapping(value = "/{username}/roles")
+    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
+        try {
+            String authorityName = (String) fields.get("authority");
+            userService.addAuthority(username, authorityName);
+            return ResponseEntity.noContent().build();
+        }
+        catch (Exception ex) {
+            throw new BadRequestException();
+        }
+    }
+
+    @DeleteMapping(value = "/{username}/roles/{authority}")
+    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
+        userService.removeAuthority(username, authority);
+        return ResponseEntity.noContent().build();
+    }
+
 }

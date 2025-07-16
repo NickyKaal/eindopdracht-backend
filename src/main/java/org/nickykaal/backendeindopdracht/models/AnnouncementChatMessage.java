@@ -20,11 +20,9 @@ public class AnnouncementChatMessage {
     Announcement announcement;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name="id_reply")
     private AnnouncementChatMessage message;
 
     @OneToMany(mappedBy="message")
-    @JsonIgnore
     Set<AnnouncementChatMessage> replies;
 }

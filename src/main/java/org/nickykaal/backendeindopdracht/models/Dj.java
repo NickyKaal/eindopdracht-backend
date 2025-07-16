@@ -16,7 +16,6 @@ public class Dj {
     Long id_dj;
 
     @ManyToMany
-    @JsonIgnore
     @JoinTable(
             name = "bookings",
             joinColumns = @JoinColumn(name = "id_dj"),

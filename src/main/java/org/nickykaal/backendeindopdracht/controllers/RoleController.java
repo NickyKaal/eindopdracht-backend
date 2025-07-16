@@ -3,12 +3,14 @@ package org.nickykaal.backendeindopdracht.controllers;
 import org.nickykaal.backendeindopdracht.dtos.RoleDto;
 import org.nickykaal.backendeindopdracht.models.Role;
 import org.nickykaal.backendeindopdracht.repositories.RoleRepository;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 public class RoleController {
 
@@ -17,6 +19,7 @@ public class RoleController {
     public RoleController(RoleRepository repos) {
         this.repos = repos;
     }
+
     @GetMapping("/roles")
     public List<RoleDto> getRoles() {
         List<RoleDto> roleDtos = new ArrayList<>();
