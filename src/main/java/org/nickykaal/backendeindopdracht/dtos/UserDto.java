@@ -24,4 +24,7 @@ public class UserDto {
     @Setter
     public Set<Role> roles;
 
+    @Getter
+    @Setter
+    public ProfileDto profile;
 }

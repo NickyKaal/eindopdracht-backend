@@ -4,10 +4,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,6 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
 
-    // De secret key moet minimaal 256 bits lang zijn, of grofweg 45 characters
     private final static String SECRET_KEY = "dfghjlfrhjgidtfilghjfsehgerthugbkudhgughuothu";
 
     private Key getSigningKey() {
@@ -25,6 +26,10 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractRoles(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -47,6 +52,13 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+
+        ArrayList<String> roles = new ArrayList<String>(0);
+        for(GrantedAuthority gd:userDetails.getAuthorities()){
+            roles.add( gd.getAuthority().replace("ROLE_",""));
+        }
+        claims.put("roles", roles);
+
         return createToken(claims, userDetails.getUsername());
     }
 
@@ -55,7 +67,8 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 10))) //TODO, env var
+//                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60) ))
                 .signWith(getSigningKey() ,SignatureAlgorithm.HS256)
                 .compact();
     }

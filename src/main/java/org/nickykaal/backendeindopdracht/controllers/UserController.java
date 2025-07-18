@@ -3,6 +3,8 @@ package org.nickykaal.backendeindopdracht.controllers;
 import org.nickykaal.backendeindopdracht.dtos.UserDto;
 import org.nickykaal.backendeindopdracht.exceptions.BadRequestException;
 import org.nickykaal.backendeindopdracht.services.UserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -47,10 +49,17 @@ public class UserController {
 
         String newUsername = userService.createUser(dto, encoder);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                .buildAndExpand(newUsername).toUri();
+        String location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{username}")
+                .buildAndExpand(newUsername)
+                .toUriString();
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
+                .header(HttpHeaders.LOCATION, location)
+                .build();
     }
 
     @GetMapping(value = "/{username}/roles")

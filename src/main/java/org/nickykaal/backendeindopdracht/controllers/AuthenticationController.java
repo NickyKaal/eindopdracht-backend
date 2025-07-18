@@ -1,15 +1,16 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
-import org.nickykaal.backendeindopdracht.dtos.AuthenticationRequest;
-import org.nickykaal.backendeindopdracht.dtos.AuthenticationResponse;
+import org.nickykaal.backendeindopdracht.dtos.AuthenticationRequestDto;
+import org.nickykaal.backendeindopdracht.services.CustomUserDetails;
 import org.nickykaal.backendeindopdracht.services.CustomUserDetailsService;
 import org.nickykaal.backendeindopdracht.utils.JwtUtil;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -35,27 +36,27 @@ public class AuthenticationController {
         return ResponseEntity.ok().body(principal);
     }
 
+    @CrossOrigin
     @PostMapping(value = "/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequestDto authenticationRequestDto) throws Exception {
 
-        String username = authenticationRequest.getUsername();
-        String password = authenticationRequest.getPassword();
+        UsernamePasswordAuthenticationToken up = new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword());
 
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
+            Authentication auth = authenticationManager.authenticate(up);
+
+            CustomUserDetails ud = (CustomUserDetails) auth.getPrincipal();
+            String token = jwtUtl.generateToken(ud);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION)
+                    .body("Token generated");
         }
-        catch (BadCredentialsException ex) {
-            throw new Exception("Incorrect username or password", ex);
+        catch (AuthenticationException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
-        final UserDetails userDetails = userDetailsService
-                .loadUserByUsername(username);
-
-        final String jwt = jwtUtl.generateToken(userDetails);
-
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
 }

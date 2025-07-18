@@ -1,6 +1,9 @@
 package org.nickykaal.backendeindopdracht.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,22 +16,32 @@ public class Profile {
     private Integer id_profile;
 
     @OneToOne
+    @JoinColumn(name="username")
     private User user;
 
     @Getter
     @Setter
-    private String username;
-
-    @Getter
-    @Setter
+    @NotBlank
+    @Size(max = 64)
     private String lastname;
 
     @Getter
     @Setter
+    @NotBlank
+    @Size(max = 64)
     private String firstname;
 
     @Getter
     @Setter
-    private String address;
+    @NotBlank
+    @Size(max = 6)
+    private String gender;
+
+    @Getter
+    @Setter
+    @NotBlank
+    @Column(unique = true)
+    @Email
+    String email;
 
 }

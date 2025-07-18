@@ -25,6 +25,7 @@ public class User {
     @Getter
     @Setter
     @NotBlank
+    @Column(unique = true)
     @Email
     String email;
 

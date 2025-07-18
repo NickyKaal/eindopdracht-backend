@@ -56,12 +56,9 @@ public class UserService {
         User user = toUser(userDto, encoder);
 
         Set<Role> userRoles = user.getRoles();
-        for (Role role : userDto.roles) {
-            Optional<Role> or = roleRepos.findById("ROLE_" + role.getRolename());
-            if (or.isPresent()) {
-                userRoles.add(or.get());
-            }
-        }
+        Optional<Role> user_role = roleRepos.findById("ROLE_USER");
+
+        user_role.ifPresent(userRoles::add);
 
         User newUser = userRepository.save(user);
         return newUser.getUsername();

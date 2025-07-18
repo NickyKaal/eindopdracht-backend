@@ -24,10 +24,9 @@ public class ProfileController {
     @PostMapping
     public ResponseEntity<Profile> createProfile(@RequestBody ProfileDto profileDto) {
         Profile profile = new Profile();
-        profile.setUsername(profileDto.username);
         profile.setFirstname(profileDto.firstname);
         profile.setLastname(profileDto.lastname);
-        profile.setAddress(profileDto.address);
+
 
         this.repos.save(profile);
 
@@ -39,10 +38,8 @@ public class ProfileController {
         if( userDetails.getUsername().equals(username)) {
             Profile profile = this.repos.findById(username).get();  // happy flow
             ProfileDto profileDto = new ProfileDto();
-            profileDto.username = profile.getUsername();
             profileDto.firstname = profile.getFirstname();
             profileDto.lastname = profile.getLastname();
-            profileDto.address = profile.getAddress();
 
             return ResponseEntity.ok(profileDto);
         }

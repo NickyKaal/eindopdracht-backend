@@ -55,11 +55,12 @@ public class SpringSecurityConfig {
                     .requestMatchers(HttpMethod.GET,"/users").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST,"/users/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST,"/login").permitAll()
+
                     .requestMatchers("/hello").permitAll()
                     .requestMatchers("/secret").hasRole("ADMIN")
                     .requestMatchers("/profiles", "/profiles/*").authenticated()
                     .requestMatchers("/authenticated").authenticated()
-                    .requestMatchers("/login").permitAll()
                     .anyRequest().denyAll()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

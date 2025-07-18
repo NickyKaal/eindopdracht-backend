@@ -7,10 +7,6 @@ public class ProfileDto {
 
     @Getter
     @Setter
-    public String username;
-
-    @Getter
-    @Setter
     public String lastname;
 
     @Getter
@@ -19,11 +15,11 @@ public class ProfileDto {
 
     @Getter
     @Setter
-    public String address;
+    public String email;
 
     @Getter
     @Setter
-    public String bankaccount;
+    public String gender;
 }
 
 
