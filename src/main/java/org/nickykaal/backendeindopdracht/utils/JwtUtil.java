@@ -29,10 +29,6 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractRoles(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -67,8 +63,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 10))) //TODO, env var
-//                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60) ))
+                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 5))) // 4 MIN TODO, env var
                 .signWith(getSigningKey() ,SignatureAlgorithm.HS256)
                 .compact();
     }

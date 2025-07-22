@@ -1,6 +1,10 @@
-package org.nickykaal.backendeindopdracht.exceptions;
+package org.nickykaal.backendeindopdracht.controllers;
 
 import jakarta.validation.ConstraintViolationException;
+import org.nickykaal.backendeindopdracht.dtos.ValidationExceptionDto;
+import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
+import org.nickykaal.backendeindopdracht.exceptions.ValidationException;
+import org.nickykaal.backendeindopdracht.utils.ValidationResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,5 +47,13 @@ public class ExceptionController {
     public ResponseEntity <String> illegalArgumentException(IllegalArgumentException ex){
 
         return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity <ValidationExceptionDto> validationException(ValidationException ex){
+
+        ValidationExceptionDto responseDto = new ValidationExceptionDto( ex.getErrors());
+
+        return ResponseEntity.badRequest().body( responseDto);
     }
 }

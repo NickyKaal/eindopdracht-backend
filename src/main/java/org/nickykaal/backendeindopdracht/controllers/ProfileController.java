@@ -1,7 +1,6 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
 import org.nickykaal.backendeindopdracht.dtos.ProfileDto;
-import org.nickykaal.backendeindopdracht.models.Profile;
 import org.nickykaal.backendeindopdracht.repositories.ProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +21,8 @@ public class ProfileController {
     }
     //TODO: service maken
     @PostMapping
-    public ResponseEntity<Profile> createProfile(@RequestBody ProfileDto profileDto) {
-        Profile profile = new Profile();
+    public ResponseEntity<org.nickykaal.backendeindopdracht.models.Profile> createProfile(@RequestBody ProfileDto profileDto) {
+        org.nickykaal.backendeindopdracht.models.Profile profile = new org.nickykaal.backendeindopdracht.models.Profile();
         profile.setFirstname(profileDto.firstname);
         profile.setLastname(profileDto.lastname);
 
@@ -36,7 +35,7 @@ public class ProfileController {
     @GetMapping("/{username}")
     public ResponseEntity<ProfileDto> getProfile(@PathVariable String username, @AuthenticationPrincipal UserDetails userDetails) {
         if( userDetails.getUsername().equals(username)) {
-            Profile profile = this.repos.findById(username).get();  // happy flow
+            org.nickykaal.backendeindopdracht.models.Profile profile = this.repos.findById(username).get();  // happy flow
             ProfileDto profileDto = new ProfileDto();
             profileDto.firstname = profile.getFirstname();
             profileDto.lastname = profile.getLastname();

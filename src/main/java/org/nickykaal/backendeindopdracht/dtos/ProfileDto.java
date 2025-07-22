@@ -20,6 +20,7 @@ public class ProfileDto {
     @Getter
     @Setter
     public String gender;
+
 }
 
 

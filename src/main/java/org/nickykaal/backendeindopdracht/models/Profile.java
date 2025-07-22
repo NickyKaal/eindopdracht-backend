@@ -17,6 +17,8 @@ public class Profile {
 
     @OneToOne
     @JoinColumn(name="username")
+    @Setter
+    @Getter
     private User user;
 
     @Getter

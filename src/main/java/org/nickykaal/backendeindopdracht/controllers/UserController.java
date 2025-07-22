@@ -1,7 +1,9 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
-import org.nickykaal.backendeindopdracht.dtos.UserDto;
+import org.nickykaal.backendeindopdracht.dtos.UserRequestDto;
+import org.nickykaal.backendeindopdracht.dtos.UserResponseDto;
 import org.nickykaal.backendeindopdracht.exceptions.BadRequestException;
+import org.nickykaal.backendeindopdracht.models.User;
 import org.nickykaal.backendeindopdracht.services.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -10,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -28,38 +29,39 @@ public class UserController {
     }
 
     @GetMapping(value = "")
-    public ResponseEntity<List<UserDto>> getUsers() {
+    public ResponseEntity<List<UserRequestDto>> getUsers() {
 
-        List<UserDto> userDtos = userService.getUsers();
+        List<UserRequestDto> userRequestDtos = userService.getUsers();
 
-        return ResponseEntity.ok().body(userDtos);
+        return ResponseEntity.ok().body(userRequestDtos);
     }
 
     @GetMapping(value = "/{username}")
-    public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
+    public ResponseEntity<UserRequestDto> getUser(@PathVariable("username") String username) {
 
-        UserDto optionalUser = userService.getUser(username);
+        UserRequestDto optionalUser = userService.getUser(username);
 
         return ResponseEntity.ok().body(optionalUser);
 
     }
 
     @PostMapping(value = "")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) {;
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {;
 
-        String newUsername = userService.createUser(dto, encoder);
+        User user = userService.createUser(dto, encoder);
 
         String location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{username}")
-                .buildAndExpand(newUsername)
+                .buildAndExpand(user.getUsername())
                 .toUriString();
+
+
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
                 .header(HttpHeaders.LOCATION, location)
-                .build();
+                .body(userService.toResponseDto( user));
     }
 
     @GetMapping(value = "/{username}/roles")

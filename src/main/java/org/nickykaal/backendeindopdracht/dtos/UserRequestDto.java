@@ -6,25 +6,22 @@ import org.nickykaal.backendeindopdracht.models.Role;
 
 import java.util.Set;
 
-public class UserDto {
+public class UserRequestDto {
 
     @Getter
     @Setter
-    public String username;
+    private String username;
 
     @Getter
     @Setter
-    public String password;
+    private String password;
+
 
     @Getter
     @Setter
-    public String email;
+    private Set<Role> roles;
 
     @Getter
     @Setter
-    public Set<Role> roles;
-
-    @Getter
-    @Setter
-    public ProfileDto profile;
+    private ProfileDto profile;
 }

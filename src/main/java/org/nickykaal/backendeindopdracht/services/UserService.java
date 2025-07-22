@@ -1,12 +1,16 @@
 package org.nickykaal.backendeindopdracht.services;
 
-import org.nickykaal.backendeindopdracht.dtos.UserDto;
-import org.nickykaal.backendeindopdracht.exceptions.RecordNotFoundException;
+import org.nickykaal.backendeindopdracht.dtos.ProfileDto;
+import org.nickykaal.backendeindopdracht.dtos.UserRequestDto;
+import org.nickykaal.backendeindopdracht.dtos.UserResponseDto;
+import org.nickykaal.backendeindopdracht.exceptions.ValidationException;
+import org.nickykaal.backendeindopdracht.models.Profile;
 import org.nickykaal.backendeindopdracht.models.Role;
 import org.nickykaal.backendeindopdracht.models.User;
+import org.nickykaal.backendeindopdracht.repositories.ProfileRepository;
 import org.nickykaal.backendeindopdracht.repositories.RoleRepository;
 import org.nickykaal.backendeindopdracht.repositories.UserRepository;
-import org.nickykaal.backendeindopdracht.utils.RandomStringGenerator;
+import org.nickykaal.backendeindopdracht.utils.ValidationResult;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,117 +22,140 @@ import java.util.Set;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepos;
+    private final UserRepository userRepo;
+    private final RoleRepository roleRepo;
+    private final ProfileRepository profileRepo;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepos) {
-        this.userRepository = userRepository;
-        this.roleRepos = roleRepos;
+    public UserService(UserRepository userRepo, RoleRepository roleRepo, ProfileRepository profileRepo) {
+        this.userRepo = userRepo;
+        this.roleRepo = roleRepo;
+        this.profileRepo = profileRepo;
     }
 
 
-    public List<UserDto> getUsers() {
-        List<UserDto> collection = new ArrayList<>();
-        List<User> list = userRepository.findAll();
+    public List<UserRequestDto> getUsers() {
+        List<UserRequestDto> collection = new ArrayList<>();
+        List<User> list = userRepo.findAll();
         for (User user : list) {
-            collection.add(fromUser(user));
+            collection.add(toDto(user));
         }
         return collection;
     }
 
-    public UserDto getUser(String username) {
-        UserDto dto = new UserDto();
-        Optional<User> user = userRepository.findById(username);
+    public UserRequestDto getUser(String username) {
+        UserRequestDto dto = new UserRequestDto();
+        Optional<User> user = userRepo.findById(username);
         if (user.isPresent()){
-            dto = fromUser(user.get());
+            dto = toDto(user.get());
         }else {
             throw new UsernameNotFoundException(username);
         }
         return dto;
     }
 
-    public boolean userExists(String username) {
-        return userRepository.existsById(username);
-    }
+//    public boolean userExists(String username) {
+//        return userRepo.existsById(username);
+//    }
 
-    public String createUser(UserDto userDto, PasswordEncoder encoder) {
+    public User createUser(UserRequestDto userRequestDto, PasswordEncoder encoder) {
+        List<ValidationResult> validationResults= new ArrayList<ValidationResult>();
 
-        User user = toUser(userDto, encoder);
+        if( userRepo.findById( userRequestDto.getUsername()).isPresent()){
+            validationResults.add( new ValidationResult("username", ValidationResult.NOT_UNIQUE));
+        }
+
+        if( profileRepo.findByEmail( userRequestDto.getProfile().getEmail()).isPresent()){
+            validationResults.add( new ValidationResult("email", ValidationResult.IN_USE));
+        }
+
+        if( validationResults.size() > 0){
+            throw new ValidationException( validationResults);
+        }
+
+        User user = fromDto(userRequestDto, encoder);
 
         Set<Role> userRoles = user.getRoles();
-        Optional<Role> user_role = roleRepos.findById("ROLE_USER");
-
+        Optional<Role> user_role = roleRepo.findById("ROLE_USER");
         user_role.ifPresent(userRoles::add);
 
-        User newUser = userRepository.save(user);
-        return newUser.getUsername();
+
+        User newUser = userRepo.save(user);
+        Profile profile = addProfile( newUser, userRequestDto.getProfile());
+
+        profileRepo.save(profile);
+
+        return newUser;
     }
 
-    public void deleteUser(String username) {
-        userRepository.deleteById(username);
+    public Profile addProfile(User user, Profile profile){
+
+        profile.setUser( user);
+        profile = profileRepo.save( profile);
+
+        user.setProfile(profile);
+
+        return profile;
     }
 
-    public void updateUser(String username, UserDto newUser) {
-        if (!userRepository.existsById(username)) throw new RecordNotFoundException();
-        User user = userRepository.findById(username).get();
-        user.setPassword(newUser.getPassword());
-        userRepository.save(user);
+    public Profile addProfile(User user, ProfileDto profileDto){
+
+        return addProfile(user, ProfileService.fromDto( profileDto));
     }
+
 
     public Set<Role> getAuthorities(String username) {
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepository.findById(username).get();
-        UserDto userDto = fromUser(user);
-        return userDto.getRoles();
+        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
+        User user = userRepo.findById(username).get();
+        UserRequestDto userRequestDto = toDto(user);
+        return userRequestDto.getRoles();
     }
 
     public void addAuthority(String username, String authority) {
 
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepository.findById(username).get();
+        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
+        User user = userRepo.findById(username).get();
         user.addRole( new Role( authority));
-        userRepository.save(user);
+        userRepo.save(user);
     }
 
     public void removeAuthority(String username, String authority) {
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepository.findById(username).get();
+        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
+        User user = userRepo.findById(username).get();
         Role roleToRemove = user.getRoles().stream().filter((a) -> a.getRolename().equalsIgnoreCase(authority)).findAny().get();
         user.removeRole(roleToRemove);
-        userRepository.save(user);
+        userRepo.save(user);
     }
 
-    public static UserDto fromUser(User user){
+    public static UserRequestDto toDto(User user){
 
-        var dto = new UserDto();
+        var dto = new UserRequestDto();
 
-        dto.username = user.getUsername();
-        dto.password = user.getPassword();
-        dto.email = user.getEmail();
-        dto.roles = user.getRoles();
+        dto.setUsername( user.getUsername());
+        dto.setPassword( user.getPassword());
+        dto.setRoles( user.getRoles());
+        dto.setProfile( ProfileService.toDto( user.getProfile()));
 
         return dto;
     }
 
-    public User toUser(UserDto userDto) {
+
+    public User fromDto(UserRequestDto userRequestDto, PasswordEncoder encoder) {
 
         var user = new User();
 
-        user.setUsername(userDto.getUsername());
-        user.setEmail(userDto.getEmail());
+        user.setUsername(userRequestDto.getUsername());
+        user.setPassword(encoder.encode(userRequestDto.getPassword()));
 
         return user;
     }
 
-    public User toUser(UserDto userDto, PasswordEncoder encoder) {
+    public UserResponseDto toResponseDto(User user) {
 
-        var user = new User();
+        var dto = new UserResponseDto();
 
-        user.setUsername(userDto.getUsername());
-        user.setPassword(encoder.encode(userDto.password));
-        user.setEmail(userDto.getEmail());
+        dto.setUsername( user.getUsername());
+        dto.setProfile( ProfileService.toDto( user.getProfile()));
 
-        return user;
+        return dto;
     }
-
 }

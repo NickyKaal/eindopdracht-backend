@@ -19,15 +19,15 @@ public class User {
     @Setter
     @NotBlank
     @Size(min=6, max = 64)
-    String username;
+    private String username;
 
 
-    @Getter
-    @Setter
-    @NotBlank
-    @Column(unique = true)
-    @Email
-    String email;
+//    @Getter
+//    @Setter
+//    @NotBlank
+//    @Column(unique = true)
+//    @Email
+//    private String email;
 
     @Setter
     @Getter
@@ -54,14 +54,16 @@ public class User {
     }
 
     @OneToMany
-    Set<Friendship> friends;
+    private Set<Friendship> friends;
 
     @OneToMany(mappedBy="user")
-    Set<Friendship> users;
+    private Set<Friendship> users;
 
     @OneToOne(mappedBy="user")
-    Agenda agenda;
+    private Agenda agenda;
 
+    @Getter
+    @Setter
     @OneToOne(mappedBy="user")
-    Profile profile;
+    private Profile profile;
 }
