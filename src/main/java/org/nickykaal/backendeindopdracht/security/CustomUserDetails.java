@@ -1,4 +1,4 @@
-package org.nickykaal.backendeindopdracht.services;
+package org.nickykaal.backendeindopdracht.security;
 
 import org.nickykaal.backendeindopdracht.models.Role;
 import org.nickykaal.backendeindopdracht.models.User;
@@ -41,21 +41,21 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; //TODO
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true;//TODO
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true;//TODO
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isEnabled();
     }
 }

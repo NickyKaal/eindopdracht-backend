@@ -13,16 +13,16 @@ public class EventChatMessage {
     @Id
     @GeneratedValue
     @Getter
-    Long id_message;
+    private Long id_message;
 
     @JoinColumn(name="id_event")
     @ManyToOne
-    Event event;
+    private Event event;
 
     @ManyToOne
     @JoinColumn(name="id_reply")
     private EventChatMessage message;
 
     @OneToMany(mappedBy="message")
-    Set<EventChatMessage> replies;
+    private Set<EventChatMessage> replies;
 }

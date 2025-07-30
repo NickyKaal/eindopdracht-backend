@@ -7,20 +7,24 @@ public class ProfileDto {
 
     @Getter
     @Setter
-    public String lastname;
+    private String lastname;
 
     @Getter
     @Setter
-    public String firstname;
+    private String firstname;
 
     @Getter
     @Setter
-    public String email;
+    private String email;
 
     @Getter
     @Setter
-    public String gender;
+    private String gender;
 
+
+    @Getter
+    @Setter
+    private String description;
 }
 
 

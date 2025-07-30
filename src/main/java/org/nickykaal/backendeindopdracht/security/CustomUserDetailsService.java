@@ -1,8 +1,9 @@
-package org.nickykaal.backendeindopdracht.services;
+package org.nickykaal.backendeindopdracht.security;
 
 
 import org.nickykaal.backendeindopdracht.models.User;
 import org.nickykaal.backendeindopdracht.repositories.UserRepository;
+import org.nickykaal.backendeindopdracht.services.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

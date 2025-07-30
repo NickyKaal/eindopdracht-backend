@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolationException;
 import org.nickykaal.backendeindopdracht.dtos.ValidationExceptionDto;
 import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
 import org.nickykaal.backendeindopdracht.exceptions.ValidationException;
-import org.nickykaal.backendeindopdracht.utils.ValidationResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

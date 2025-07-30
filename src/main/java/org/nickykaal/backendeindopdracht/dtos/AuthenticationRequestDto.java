@@ -15,6 +15,7 @@ public class AuthenticationRequestDto {
 
     public AuthenticationRequestDto() {
     }
+
     public AuthenticationRequestDto(String username, String password) {
         this.username = username;
         this.password = password;

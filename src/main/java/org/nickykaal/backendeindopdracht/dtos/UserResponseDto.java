@@ -14,5 +14,6 @@ public class UserResponseDto {
 
     @Getter
     @Setter
-    private ProfileDto profile;
+    private Boolean enabled;
+
 }

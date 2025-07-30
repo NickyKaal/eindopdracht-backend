@@ -12,6 +12,7 @@ public class ProfileService {
         profileDto.setGender(profile.getGender());
         profileDto.setFirstname(profile.getFirstname());
         profileDto.setLastname(profile.getLastname());
+        profileDto.setDescription(profile.getDescription());
 
         return profileDto;
     }
@@ -23,6 +24,7 @@ public class ProfileService {
         profile.setGender(profileDto.getGender());
         profile.setFirstname(profileDto.getFirstname());
         profile.setLastname(profileDto.getLastname());
+        profile.setDescription(profileDto.getDescription());
 
         return profile;
     }

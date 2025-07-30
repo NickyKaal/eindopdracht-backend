@@ -13,16 +13,16 @@ public class Friendship {
     @Id
     @GeneratedValue
     @Getter
-    Long id_friendship;
+    private Long id_friendship;
 
     @Getter
     private Date created;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
-    User user;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_friend")
-    User friend;
+    private User friend;
 }

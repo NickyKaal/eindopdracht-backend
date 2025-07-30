@@ -15,16 +15,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
     private final UserRepository userRepo;
     private final RoleRepository roleRepo;
     private final ProfileRepository profileRepo;
+    private final Set<String> genders = Stream.of("male", "female").collect(Collectors.toCollection(HashSet::new));
 
     public UserService(UserRepository userRepo, RoleRepository roleRepo, ProfileRepository profileRepo) {
         this.userRepo = userRepo;
@@ -32,43 +32,40 @@ public class UserService {
         this.profileRepo = profileRepo;
     }
 
+    public List<User> getUsers() {
+        List<User> list = userRepo.findByEnabled(true);
 
-    public List<UserRequestDto> getUsers() {
-        List<UserRequestDto> collection = new ArrayList<>();
-        List<User> list = userRepo.findAll();
-        for (User user : list) {
-            collection.add(toDto(user));
-        }
-        return collection;
+        return list;
     }
 
-    public UserRequestDto getUser(String username) {
-        UserRequestDto dto = new UserRequestDto();
-        Optional<User> user = userRepo.findById(username);
+    public User getUser(String username) {
+        Optional<User> user = userRepo.findByUsernameAndEnabled(username, true);
         if (user.isPresent()){
-            dto = toDto(user.get());
-        }else {
+            return user.get();
+        }
+        else {
             throw new UsernameNotFoundException(username);
         }
-        return dto;
     }
-
-//    public boolean userExists(String username) {
-//        return userRepo.existsById(username);
-//    }
 
     public User createUser(UserRequestDto userRequestDto, PasswordEncoder encoder) {
         List<ValidationResult> validationResults= new ArrayList<ValidationResult>();
+
+        ProfileDto profileDto = userRequestDto.getProfile();
 
         if( userRepo.findById( userRequestDto.getUsername()).isPresent()){
             validationResults.add( new ValidationResult("username", ValidationResult.NOT_UNIQUE));
         }
 
-        if( profileRepo.findByEmail( userRequestDto.getProfile().getEmail()).isPresent()){
+        if( profileRepo.findByEmail( profileDto.getEmail()).isPresent()){
             validationResults.add( new ValidationResult("email", ValidationResult.IN_USE));
         }
 
-        if( validationResults.size() > 0){
+        if( profileDto.getGender().describeConstable().isPresent() && !genders.contains(profileDto.getGender())){
+            validationResults.add( new ValidationResult("gender", ValidationResult.INVALID));
+        }
+
+        if(!validationResults.isEmpty()){
             throw new ValidationException( validationResults);
         }
 
@@ -78,11 +75,16 @@ public class UserService {
         Optional<Role> user_role = roleRepo.findById("ROLE_USER");
         user_role.ifPresent(userRoles::add);
 
-
         User newUser = userRepo.save(user);
-        Profile profile = addProfile( newUser, userRequestDto.getProfile());
 
-        profileRepo.save(profile);
+        try {
+            Profile profile = addProfile( newUser, userRequestDto.getProfile());
+            profileRepo.save(profile);
+        }
+        catch(Exception e){
+            userRepo.delete(newUser);
+            throw e;
+        }
 
         return newUser;
     }
@@ -103,39 +105,33 @@ public class UserService {
     }
 
 
-    public Set<Role> getAuthorities(String username) {
-        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepo.findById(username).get();
-        UserRequestDto userRequestDto = toDto(user);
-        return userRequestDto.getRoles();
-    }
+    public void addRole(String username, String authority) {
 
-    public void addAuthority(String username, String authority) {
+        if (!userRepo.existsById(username)){
+            throw new UsernameNotFoundException(username);
+        }
 
-        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
         User user = userRepo.findById(username).get();
-        user.addRole( new Role( authority));
+        user.addRole( new Role( "ROLE_"+authority)); //TODO: only add if exists
         userRepo.save(user);
     }
 
-    public void removeAuthority(String username, String authority) {
-        if (!userRepo.existsById(username)) throw new UsernameNotFoundException(username);
+    public void removeRole(String username, String authority) {
+        if (!userRepo.existsById(username)){
+            throw new UsernameNotFoundException(username);
+        }
+
         User user = userRepo.findById(username).get();
-        Role roleToRemove = user.getRoles().stream().filter((a) -> a.getRolename().equalsIgnoreCase(authority)).findAny().get();
-        user.removeRole(roleToRemove);
-        userRepo.save(user);
-    }
-
-    public static UserRequestDto toDto(User user){
-
-        var dto = new UserRequestDto();
-
-        dto.setUsername( user.getUsername());
-        dto.setPassword( user.getPassword());
-        dto.setRoles( user.getRoles());
-        dto.setProfile( ProfileService.toDto( user.getProfile()));
-
-        return dto;
+        user.getRoles()
+            .stream()
+            .filter(
+                (a) -> a.getRolename().equalsIgnoreCase("ROLE_"+authority)
+            )
+            .findAny()
+            .ifPresent( role -> {
+                user.removeRole(role);
+                userRepo.save(user);
+            });
     }
 
 
@@ -154,8 +150,24 @@ public class UserService {
         var dto = new UserResponseDto();
 
         dto.setUsername( user.getUsername());
-        dto.setProfile( ProfileService.toDto( user.getProfile()));
+        dto.setEnabled( user.isEnabled());
 
         return dto;
+    }
+
+    public List<UserResponseDto> toResponseDto(List<User> users) {
+
+        List<UserResponseDto> collection = new ArrayList<>();
+        for (User user : users) {
+            collection.add(toResponseDto(user));
+        }
+
+        return collection;
+    }
+
+    public void deleteUser(String username) {
+        User user = getUser(username);
+        user.setEnabled(false);
+        userRepo.save(user);
     }
 }

@@ -12,21 +12,21 @@ public class Event {
     @Id
     @GeneratedValue
     @Getter
-    Long id_event;
+    private Long id_event;
 
     @OneToMany(mappedBy="event")
-    Set<AgendaEntry> scheduledEvents;
+    private Set<AgendaEntry> scheduledEvents;
 
     @OneToMany(mappedBy="event")
-    Set<EventChatMessage> chatMessages;
+    private Set<EventChatMessage> chatMessages;
 
     @ManyToMany(mappedBy = "bookings")
-    Set<Dj> djs;
+    private Set<Dj> djs;
 
     @ManyToMany(mappedBy = "events")
-    Set<Genre> genres;
+    private Set<Genre> genres;
 
     @JoinColumn(name="id_location")
     @ManyToOne
-    Location location;
+    private Location location;
 }

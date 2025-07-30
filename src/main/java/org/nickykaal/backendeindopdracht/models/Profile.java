@@ -9,9 +9,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "profiles")
+@SequenceGenerator(name="profile_id_seq", initialValue=3)
 public class Profile {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="profile_id_seq")
     @Getter
     private Integer id_profile;
 
@@ -44,6 +45,11 @@ public class Profile {
     @NotBlank
     @Column(unique = true)
     @Email
-    String email;
+    private String email;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
 }

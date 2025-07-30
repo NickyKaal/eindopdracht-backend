@@ -3,8 +3,8 @@ package org.nickykaal.backendeindopdracht.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
-public class RoleDto {
+public class RolesDto {
     @Getter
     @Setter
-    public String rolename;
+    public String[] roles;
 }

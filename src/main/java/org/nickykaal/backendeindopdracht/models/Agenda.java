@@ -13,12 +13,12 @@ public class Agenda {
     @Id
     @GeneratedValue
     @Getter
-    Long id_agenda;
+    private Long id_agenda;
 
     @OneToOne
     @JoinColumn(name = "id_user")
-    User user;
+    private User user;
 
     @OneToMany(mappedBy="agenda")
-    Set<AgendaEntry> scheduledEvents;
+    private Set<AgendaEntry> scheduledEvents;
 }

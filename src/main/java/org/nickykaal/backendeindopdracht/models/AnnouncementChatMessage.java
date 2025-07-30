@@ -13,16 +13,16 @@ public class AnnouncementChatMessage {
     @Id
     @GeneratedValue
     @Getter
-    Long id_message;
+    private Long id_message;
 
     @JoinColumn(name="id_announcement")
     @ManyToOne
-    Announcement announcement;
+    private Announcement announcement;
 
     @ManyToOne
     @JoinColumn(name="id_reply")
     private AnnouncementChatMessage message;
 
     @OneToMany(mappedBy="message")
-    Set<AnnouncementChatMessage> replies;
+    private Set<AnnouncementChatMessage> replies;
 }

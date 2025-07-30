@@ -3,6 +3,7 @@ package org.nickykaal.backendeindopdracht.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
@@ -13,8 +14,8 @@ public class Location {
     @Id
     @GeneratedValue
     @Getter
-    Long id_location;
+    private Long id_location;
 
     @OneToMany(mappedBy="location")
-    Set<Event> events;
+    private Set<Event> events;
 }

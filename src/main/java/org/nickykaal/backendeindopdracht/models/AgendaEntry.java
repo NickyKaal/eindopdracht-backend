@@ -11,13 +11,13 @@ public class AgendaEntry {
     @Id
     @GeneratedValue
     @Getter
-    Long id_entry;
+    private Long id_entry;
 
     @JoinColumn(name="id_agenda")
     @ManyToOne
-    Agenda agenda;
+    private Agenda agenda;
 
     @JoinColumn(name="id_event")
     @ManyToOne
-    Event event;
+    private Event event;
 }

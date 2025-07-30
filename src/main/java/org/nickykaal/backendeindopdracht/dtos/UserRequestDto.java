@@ -16,7 +16,6 @@ public class UserRequestDto {
     @Setter
     private String password;
 
-
     @Getter
     @Setter
     private Set<Role> roles;

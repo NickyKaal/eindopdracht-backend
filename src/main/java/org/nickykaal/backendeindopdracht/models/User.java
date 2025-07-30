@@ -34,6 +34,11 @@ public class User {
     @NotBlank
     private String password;
 
+    @Setter
+    @Getter
+    @Column(nullable = false)
+    private boolean enabled = true;
+
     @Getter
     @Setter
     @ManyToMany(fetch = FetchType.EAGER)
@@ -50,7 +55,9 @@ public class User {
     }
 
     public void removeRole(Role role) {
-        this.roles.remove(role);
+        if( this.roles.contains(role)) {
+            this.roles.remove(role);
+        }
     }
 
     @OneToMany

@@ -13,7 +13,7 @@ public class Dj {
     @Id
     @GeneratedValue
     @Getter
-    Long id_dj;
+    private Long id_dj;
 
     @ManyToMany
     @JoinTable(
@@ -21,6 +21,6 @@ public class Dj {
             joinColumns = @JoinColumn(name = "id_dj"),
             inverseJoinColumns = @JoinColumn(name = "id_event")
     )
-    Set<Event> bookings;
+    private Set<Event> bookings;
 
 }
