@@ -1,7 +1,9 @@
 package org.nickykaal.backendeindopdracht.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import org.nickykaal.backendeindopdracht.models.ProfilePicture;
 
 public class ProfileDto {
 
@@ -25,6 +27,11 @@ public class ProfileDto {
     @Getter
     @Setter
     private String description;
+
+    @Getter
+    @Setter
+    @JsonIgnoreProperties(value = {"contents","contentType"} )
+    private ProfilePicture picture;
 }
 
 

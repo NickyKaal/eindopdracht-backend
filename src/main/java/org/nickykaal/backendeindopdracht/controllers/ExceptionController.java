@@ -1,5 +1,6 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.nickykaal.backendeindopdracht.dtos.ValidationExceptionDto;
 import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,16 @@ public class ExceptionController {
             .forEach((e)-> errors.put(e.getField(), e.getDefaultMessage()));
 
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity <String> expiredJwtException(ExpiredJwtException ex){
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity <String> resourceAccessException(ResourceAccessException ex){
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

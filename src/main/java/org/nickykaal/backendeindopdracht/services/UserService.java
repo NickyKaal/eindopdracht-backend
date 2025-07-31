@@ -112,7 +112,7 @@ public class UserService {
         }
 
         User user = userRepo.findById(username).get();
-        user.addRole( new Role( "ROLE_"+authority)); //TODO: only add if exists
+        user.addRole( new Role( "ROLE_"+authority));
         userRepo.save(user);
     }
 

@@ -1,20 +1,25 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
-import org.nickykaal.backendeindopdracht.dtos.RolesDto;
-import org.nickykaal.backendeindopdracht.dtos.UserRequestDto;
-import org.nickykaal.backendeindopdracht.dtos.UserResponseDto;
+import org.nickykaal.backendeindopdracht.dtos.*;
+import org.nickykaal.backendeindopdracht.models.Profile;
 import org.nickykaal.backendeindopdracht.models.User;
 import org.nickykaal.backendeindopdracht.security.CustomUserDetailsService;
+import org.nickykaal.backendeindopdracht.services.ProfileService;
 import org.nickykaal.backendeindopdracht.services.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin
@@ -25,11 +30,13 @@ public class UserController {
     private final UserService userService;
     private final PasswordEncoder encoder;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ProfileService profileService;
 
-    public UserController(UserService userService, PasswordEncoder encoder, CustomUserDetailsService customUserDetailsService) {
+    public UserController(UserService userService, ProfileService profileService, PasswordEncoder encoder, CustomUserDetailsService customUserDetailsService) {
         this.userService = userService;
         this.encoder = encoder;
         this.customUserDetailsService = customUserDetailsService;
+        this.profileService = profileService;
     }
 
     @GetMapping(value = "")
@@ -42,6 +49,7 @@ public class UserController {
 
     @PostMapping(value = "")
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {;
+
 
         User user = userService.createUser(dto, encoder);
 
@@ -79,6 +87,50 @@ public class UserController {
         }
         catch( UsernameNotFoundException e){
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(value = "/{username}/profile")
+    public ResponseEntity<ProfileDto> getProfile(@PathVariable("username") String username) {
+        try {
+            Profile profile = profileService.getProfile(username);
+            return ResponseEntity.ok().body(ProfileService.toDto(profile));
+        }
+        catch( UsernameNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping(value = "/{username}/profile")
+    public ResponseEntity<ProfileDto> updateProfile(@PathVariable("username") String username, @RequestBody ProfileDto profileDto, Authentication authentication) {
+        try {
+            Profile profile = profileService.updateProfile(username, profileDto, authentication);
+
+            return ResponseEntity.ok().body(ProfileService.toDto(profile));
+        }
+        catch( UsernameNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(value = "/{username}/profile/picture")
+    public ResponseEntity<?> uploadProfilePicture(@PathVariable("username") String username,
+//                                                           @RequestBody ProfilePictureDto dto,
+                                                           @RequestBody MultipartFile file,
+                                                           Authentication authentication){
+        try {
+//            Profile profile = profileService.uploadProfilePicture(username, dto.getFile(), authentication);
+            Profile profile = profileService.uploadProfilePicture(username, file, authentication);
+
+//            return ResponseEntity.ok().body(ProfileService.toDto(profile));
+            return ResponseEntity.ok().build();
+        }
+        catch( UsernameNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        catch (IOException e) {
+
+            throw new RuntimeException(e);
         }
     }
 

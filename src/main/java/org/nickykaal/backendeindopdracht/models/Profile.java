@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "profiles")
 @SequenceGenerator(name="profile_id_seq", initialValue=3)
@@ -21,6 +23,11 @@ public class Profile {
     @Setter
     @Getter
     private User user;
+
+    @Setter
+    @Getter
+    @OneToOne(mappedBy="profile")
+    private ProfilePicture profilePicture;
 
     @Getter
     @Setter
