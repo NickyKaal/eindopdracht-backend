@@ -32,17 +32,15 @@ public class ProfilePicture {
     @Setter
     private String contentType;
 
-
-    @Lob
     @Getter
     @Setter
-    private byte[] contents;
+    private String fileName;
 
-    public ProfilePicture(String title, String url, String contentType, byte[] contents) {
+    public ProfilePicture(String title, String url, String contentType, String fileName) {
         this.title = title;
         this.url = url;
         this.contentType = contentType;
-        this.contents = contents;
+        this.fileName = fileName;
     }
     public ProfilePicture(){
 

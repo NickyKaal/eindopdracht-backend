@@ -3,8 +3,12 @@ package org.nickykaal.backendeindopdracht.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import org.springframework.web.multipart.*;
 
 @Configuration
 public class GlobalCorsConfiguration
@@ -17,9 +21,16 @@ public class GlobalCorsConfiguration
                 registry.addMapping("/**")
                         .allowedOrigins("*")
                         .allowedHeaders("*")
-                        .exposedHeaders(HttpHeaders.LOCATION, HttpHeaders.AUTHORIZATION)
+                        .exposedHeaders("*")
+//                        .exposedHeaders(HttpHeaders.LOCATION, HttpHeaders.AUTHORIZATION)
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
             }
         };
     }
+
+//    @Bean
+//    public MultipartResolver multipartResolver() {
+//        return new StandardServletMultipartResolver();
+//    }
+
 }

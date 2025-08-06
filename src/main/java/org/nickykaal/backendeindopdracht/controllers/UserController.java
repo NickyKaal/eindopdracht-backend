@@ -1,19 +1,24 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.nickykaal.backendeindopdracht.dtos.*;
+import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
 import org.nickykaal.backendeindopdracht.models.Profile;
+import org.nickykaal.backendeindopdracht.models.ProfilePicture;
 import org.nickykaal.backendeindopdracht.models.User;
 import org.nickykaal.backendeindopdracht.security.CustomUserDetailsService;
 import org.nickykaal.backendeindopdracht.services.ProfileService;
 import org.nickykaal.backendeindopdracht.services.UserService;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,105 +73,131 @@ public class UserController {
     @GetMapping(value = "/{username}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable("username") String username) {
 
-        try {
-            User user = userService.getUser(username);
+        User user = userService.getUser(username);
 
-            return ResponseEntity.ok().body( userService.toResponseDto(user));
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().body( userService.toResponseDto(user));
+
     }
 
     @DeleteMapping(value = "/{username}")
     public ResponseEntity<Object> deleteUser(@PathVariable("username") String username){
-        try {
-            userService.deleteUser(username);
 
-            return ResponseEntity.noContent().build();
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+        userService.deleteUser(username);
+
+        return ResponseEntity.noContent().build();
+
     }
 
     @GetMapping(value = "/{username}/profile")
     public ResponseEntity<ProfileDto> getProfile(@PathVariable("username") String username) {
-        try {
-            Profile profile = profileService.getProfile(username);
-            return ResponseEntity.ok().body(ProfileService.toDto(profile));
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+
+        Profile profile = profileService.getProfile(username);
+        return ResponseEntity.ok().body(ProfileService.toDto(profile));
+
     }
 
     @PutMapping(value = "/{username}/profile")
     public ResponseEntity<ProfileDto> updateProfile(@PathVariable("username") String username, @RequestBody ProfileDto profileDto, Authentication authentication) {
-        try {
-            Profile profile = profileService.updateProfile(username, profileDto, authentication);
 
-            return ResponseEntity.ok().body(ProfileService.toDto(profile));
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+        Profile profile = profileService.updateProfile(username, profileDto, authentication);
+
+        return ResponseEntity.ok().body(ProfileService.toDto(profile));
+
     }
 
-    @PostMapping(value = "/{username}/profile/picture")
+    @PostMapping(value = "/{username}/profile/picture", consumes=MediaType.ALL_VALUE)
     public ResponseEntity<?> uploadProfilePicture(@PathVariable("username") String username,
-//                                                           @RequestBody ProfilePictureDto dto,
                                                            @RequestBody MultipartFile file,
-                                                           Authentication authentication){
-        try {
-//            Profile profile = profileService.uploadProfilePicture(username, dto.getFile(), authentication);
-            Profile profile = profileService.uploadProfilePicture(username, file, authentication);
+                                                          Authentication authentication) throws IOException {
 
-//            return ResponseEntity.ok().body(ProfileService.toDto(profile));
-            return ResponseEntity.ok().build();
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
-        catch (IOException e) {
+        profileService.uploadProfilePicture(username, file, authentication);
 
-            throw new RuntimeException(e);
+        String location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{username}")
+                .buildAndExpand(username)
+                .toUriString();
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header(HttpHeaders.LOCATION, location)
+                .build();
+
+    }
+
+    @PutMapping(value = "/{username}/profile/picture", consumes=MediaType.ALL_VALUE)
+    public ResponseEntity<?> updateProfilePicture(@PathVariable("username") String username,
+                                                           @RequestBody MultipartFile file,
+                                                           Authentication authentication) throws IOException{
+
+        profileService.updateProfilePicture(username, file, authentication);
+
+        String location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{username}")
+                .buildAndExpand(username)
+                .toUriString();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.LOCATION, location)
+                .build();
+
+    }
+
+    @GetMapping(value = "/{username}/profile/picture")
+    public ResponseEntity<Resource> getProfilePicture(@PathVariable("username") String username) throws IOException{
+
+        ProfilePicture picture = profileService.getProfilePicture(username);
+
+        if( picture == null){
+            throw new ResourceNotFoundException("profile picture does not exists");
         }
+
+        Resource pictureUrlResource = profileService.getPictureUrlResource(picture);
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.parseMediaType(picture.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + profileService.getProfilePicture(username).getTitle())
+                .body(pictureUrlResource);
+
+    }
+
+    @DeleteMapping(value = "/{username}/profile/picture")
+    public ResponseEntity<?> deleteProfilePicture(@PathVariable("username") String username, Authentication authentication) throws IOException{
+
+        profileService.deleteProfilePicture(username, authentication);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     @GetMapping(value = "/{username}/roles")
     public ResponseEntity<Object> getUserRoles(@PathVariable("username") String username) {
-        try {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-            return ResponseEntity.ok().body(userDetails.getAuthorities()); //TODO: ROLE_ uit output verwijderen + vertalen met DTO
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        return ResponseEntity.ok().body(userDetails.getAuthorities()); //TODO: ROLE_ uit output verwijderen + vertalen met DTO
+
     }
 
     @PostMapping(value = "/{username}/roles")
     public ResponseEntity<Object> addUserRole(@PathVariable("username") String username, @RequestBody RolesDto rolesDto) {
-        try {
-            for (String rolename : rolesDto.roles) {
-                userService.addRole(username, rolename);
-            }
 
-            return ResponseEntity.noContent().build();
+        for (String rolename : rolesDto.roles) {
+            userService.addRole(username, rolename);
         }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+
+        return ResponseEntity.noContent().build();
+
     }
 
     @DeleteMapping(value = "/{username}/roles/{role}")
     public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("role") String role) {
-        try {
-            userService.removeRole(username, role);
-            return ResponseEntity.noContent().build();
-        }
-        catch( UsernameNotFoundException e){
-            return ResponseEntity.notFound().build();
-        }
+
+        userService.removeRole(username, role);
+        return ResponseEntity.noContent().build();
+
     }
 }

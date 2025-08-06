@@ -2,6 +2,8 @@ package org.nickykaal.backendeindopdracht.services;
 
 import jakarta.transaction.Transactional;
 import org.nickykaal.backendeindopdracht.dtos.ProfileDto;
+import org.nickykaal.backendeindopdracht.exceptions.AlreadyExistsException;
+import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
 import org.nickykaal.backendeindopdracht.models.Profile;
 import org.nickykaal.backendeindopdracht.models.ProfilePicture;
 import org.nickykaal.backendeindopdracht.models.User;
@@ -9,15 +11,19 @@ import org.nickykaal.backendeindopdracht.repositories.ProfilePictureRepository;
 import org.nickykaal.backendeindopdracht.repositories.ProfileRepository;
 import org.nickykaal.backendeindopdracht.repositories.RoleRepository;
 import org.nickykaal.backendeindopdracht.repositories.UserRepository;
+import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.*;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,11 +32,13 @@ public class ProfileService {
     private final ProfileRepository profileRepo;
     private final UserService userService;
     private final ProfilePictureService pictureService;
+    private final ProfilePictureService profilePictureService;
 
-    public ProfileService(ProfileRepository profileRepo, UserService userService, ProfilePictureService pictureService) {
+    public ProfileService(ProfileRepository profileRepo, UserService userService, ProfilePictureService pictureService, ProfilePictureService profilePictureService) {
         this.profileRepo = profileRepo;
         this.userService = userService;
         this.pictureService = pictureService;
+        this.profilePictureService = profilePictureService;
     }
 
     public Profile getProfile(String username){
@@ -63,7 +71,7 @@ public class ProfileService {
         return profile;
     }
 
-    private boolean isOwner(Profile profile, Authentication authentication){
+    public boolean isOwner(Profile profile, Authentication authentication){
         return profile.getUser().getUsername().equals( authentication.getName());
     }
 
@@ -101,30 +109,93 @@ public class ProfileService {
     }
 
 
-    @Transactional
-    public Profile uploadProfilePicture(String username, MultipartFile file, Authentication authentication) throws IOException {
+    public String uploadProfilePicture(String username, MultipartFile file, Authentication authentication) throws IOException {
         Profile profile = getProfile(username);
 
         if( isOwner(profile, authentication)) {
 
+            String contentType = file.getContentType();
+            if ( contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+                throw new IllegalArgumentException("Only JPEG or PNG images are allowed");
+            }
+
             String url = ServletUriComponentsBuilder
                     .fromCurrentRequest()
-                    .path("/{username}")
-                    .path("/profile")
-                    .path("/picture")
                     .buildAndExpand(username)
                     .toUriString();
 
+            if( profile.getProfilePicture() != null){
+                throw new AlreadyExistsException("There already exists a profile picture");
+            }
 
             ProfilePicture picture = pictureService.storePicture(file, url);
 
-            profile.setProfilePicture(picture);
+            picture.setProfile(profile);
+            pictureService.repo.save(picture);
 
-            profile = profileRepo.save(profile);
-
-            return profile;
+            return picture.getUrl();
         }
 
         throw new ResourceAccessException("Cannot update profile if you are not the owner");
+    }
+
+    public String updateProfilePicture(String username, MultipartFile file, Authentication authentication) throws IOException {
+        Profile profile = getProfile(username);
+
+        if( isOwner(profile, authentication)) {
+
+            String contentType = file.getContentType();
+            if ( contentType == null || !contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+                throw new IllegalArgumentException("Only JPEG or PNG images are allowed");
+            }
+
+            ProfilePicture profilePicture = profile.getProfilePicture();
+
+            profilePictureService.updateProfilePicture(file, profilePicture);
+
+            return profilePicture.getUrl();
+        }
+
+        throw new ResourceAccessException("Cannot update profile if you are not the owner");
+    }
+
+    public ProfilePicture getProfilePicture(String username) {
+        Profile profile = getProfile(username);
+        return profile.getProfilePicture();
+
+    }
+
+    public Resource getPictureUrlResource(String userName) throws IOException {
+        ProfilePicture picture = getProfilePicture(userName);
+
+        return getPictureUrlResource(picture);
+    }
+
+    public Resource getPictureUrlResource(ProfilePicture picture) throws IOException {
+
+        return profilePictureService.getPictureUrlResource(picture.getFileName());
+    }
+
+    public void deleteProfilePicture(String username, Authentication authentication) throws IOException {
+        Profile profile = getProfile(username);
+
+        if( isOwner(profile, authentication)) {
+
+            ProfilePicture profilePicture = profile.getProfilePicture();
+
+            if( profilePicture == null){
+                throw new ResourceNotFoundException("profile picture does not exists");
+            }
+
+            profile.setProfilePicture(null);
+            profileRepo.save(profile);
+
+            profilePictureService.deleteProfilePicture(profilePicture);
+
+
+        }
+        else {
+            throw new ResourceAccessException("Cannot update profile if you are not the owner");
+        }
     }
 }
