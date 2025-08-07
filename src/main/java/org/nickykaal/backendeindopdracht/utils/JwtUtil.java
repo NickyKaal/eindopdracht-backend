@@ -63,7 +63,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 5))) // 4 MIN TODO, env var
+                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 48))) // 48 uur TODO, env var
                 .signWith(getSigningKey() ,SignatureAlgorithm.HS256)
                 .compact();
     }

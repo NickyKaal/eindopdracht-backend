@@ -44,7 +44,7 @@ public class UserService {
             return user.get();
         }
         else {
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException(username+" not found");
         }
     }
 
@@ -108,17 +108,17 @@ public class UserService {
     public void addRole(String username, String authority) {
 
         if (!userRepo.existsById(username)){
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException(username+" not found");
         }
 
         User user = userRepo.findById(username).get();
-        user.addRole( new Role( "ROLE_"+authority)); //TODO: only add if exists
+        user.addRole( new Role( "ROLE_"+authority));
         userRepo.save(user);
     }
 
     public void removeRole(String username, String authority) {
         if (!userRepo.existsById(username)){
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException(username+" not found");
         }
 
         User user = userRepo.findById(username).get();

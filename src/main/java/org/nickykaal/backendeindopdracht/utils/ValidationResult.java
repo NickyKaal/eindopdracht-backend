@@ -1,8 +1,8 @@
 package org.nickykaal.backendeindopdracht.utils;
 
 public class ValidationResult {
-    private final String field;
-    private final String exception;
+    public final String field;
+    public final String exception;
 
     public ValidationResult(String field, String exception) {
         this.field = field;
