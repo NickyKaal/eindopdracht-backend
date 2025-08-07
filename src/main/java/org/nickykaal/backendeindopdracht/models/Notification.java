@@ -5,24 +5,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table( name="announcements")
-public class Announcement {
+@Table( name="notifications")
+public class Notification {
     @Id
     @GeneratedValue
     @Getter
-    private Long id_announcement;
+    private Long id_notification;
 
-    @OneToMany(mappedBy="announcement")
-    private Set<AnnouncementChatMessage> chatMessages;
+    @OneToMany(mappedBy="notification")
+    private Set<NotificationChatMessage> chatMessages;
 
     @Getter
     @Setter
