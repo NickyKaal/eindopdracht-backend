@@ -32,7 +32,7 @@ public class ProfilePictureService {
     private final String fileStorageLocation;
     public final ProfilePictureRepository repo;
 
-    public ProfilePictureService(@Value("${my.upload_location}") String fileStorageLocation, ProfilePictureRepository repo) throws IOException {
+    public ProfilePictureService(@Value("${my.upload_location.profile}") String fileStorageLocation, ProfilePictureRepository repo) throws IOException {
         fileStoragePath = Paths.get(fileStorageLocation).toAbsolutePath().normalize();
         this.fileStorageLocation = fileStorageLocation;
         this.repo = repo;
