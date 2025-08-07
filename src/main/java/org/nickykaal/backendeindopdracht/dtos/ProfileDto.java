@@ -27,11 +27,6 @@ public class ProfileDto {
     @Getter
     @Setter
     private String description;
-
-    @Getter
-    @Setter
-    @JsonIgnoreProperties(value = {"contents","contentType"} )
-    private ProfilePicture picture;
 }
 
 
