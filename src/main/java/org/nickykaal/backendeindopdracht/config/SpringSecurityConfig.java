@@ -71,6 +71,9 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.GET,"/users").hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/notifications").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/notifications/*").authenticated()
+
 
                         .requestMatchers(HttpMethod.POST,"/login").permitAll()
                         .requestMatchers("/authenticated").authenticated()

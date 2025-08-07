@@ -11,11 +11,12 @@ import java.util.Set;
 
 @Entity
 @Table( name="notifications")
+@SequenceGenerator(name="notification_id_seq", initialValue=10)
 public class Notification {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="notification_id_seq")
     @Getter
-    private Long id_notification;
+    private Long idNotification;
 
     @OneToMany(mappedBy="notification")
     private Set<NotificationChatMessage> chatMessages;
@@ -27,8 +28,14 @@ public class Notification {
     @Getter
     @Setter
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 90)
     private String title;
+
+    @Getter
+    @Setter
+    @NotBlank
+    @Size(max = 255)
+    private String subtitle;
 
     @Getter
     @Setter

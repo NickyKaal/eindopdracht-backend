@@ -11,14 +11,14 @@ public class NotificationChatMessage {
     @Id
     @GeneratedValue
     @Getter
-    private Long id_message;
+    private Long idMessage;
 
-    @JoinColumn(name="id_notification")
+    @JoinColumn(name="idNotification")
     @ManyToOne
     private Notification notification;
 
     @ManyToOne
-    @JoinColumn(name="id_reply")
+    @JoinColumn(name="idReply")
     private NotificationChatMessage message;
 
     @OneToMany(mappedBy="message")

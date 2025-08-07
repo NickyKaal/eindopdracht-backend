@@ -21,6 +21,10 @@ public class NotificationDto {
 
     @Getter
     @Setter
+    private String subtitle;
+
+    @Getter
+    @Setter
     private String content;
 
     @Getter
