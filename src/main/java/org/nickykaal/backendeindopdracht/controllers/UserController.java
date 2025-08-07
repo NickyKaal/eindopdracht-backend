@@ -1,6 +1,5 @@
 package org.nickykaal.backendeindopdracht.controllers;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.nickykaal.backendeindopdracht.dtos.*;
 import org.nickykaal.backendeindopdracht.exceptions.ResourceNotFoundException;
 import org.nickykaal.backendeindopdracht.models.Profile;
@@ -10,8 +9,6 @@ import org.nickykaal.backendeindopdracht.security.CustomUserDetailsService;
 import org.nickykaal.backendeindopdracht.services.ProfileService;
 import org.nickykaal.backendeindopdracht.services.UserService;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
