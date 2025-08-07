@@ -54,7 +54,6 @@ public class ProfileService {
         profileDto.setFirstname(profile.getFirstname());
         profileDto.setLastname(profile.getLastname());
         profileDto.setDescription(profile.getDescription());
-        profileDto.setPicture(profile.getProfilePicture());
 
         return profileDto;
     }
